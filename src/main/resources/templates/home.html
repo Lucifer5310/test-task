@@ -84,42 +84,30 @@
 </form>
 
 <script>
-    // Функция для извлечения токена из куки
-    function getJwtTokenFromCookie() {
-        const token = document.cookie.split('; ').find(row => row.startsWith('jwtToken')).split('=')[1];
-        return token;
-    }
-
-    // Функция для извлечения данных пользователя из JWT токена
-    function extractUserDataFromToken(token) {
-        const decoded = jwt_decode(token); // Декодируем JWT
-        return decoded; // Возвращаем все данные пользователя из токена
-    }
-
-    // Асинхронная функция для загрузки данных о пользователе
     async function loadUserData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("user_id"); // Извлекаем user_id из URL
+        const token = urlParams.get("token"); // Извлекаем user_id из URL
+
+        if (!userId) {
+            alert('Ошибка: user_id не найден в URL');
+            return;
+        }
+
         try {
-            // 1. Извлекаем токен из куки
-            const token = getJwtTokenFromCookie();
-
-            // 2. Извлекаем данные пользователя из токена
-            const userData = extractUserDataFromToken(token);
-
-            if (!userData.id) {
-                throw new Error("User ID не найден в токене");
+            if (!token) {
+                alert('Ошибка: токен не найден');
+                return;
             }
 
-            // 3. Загружаем страницу (страница уже загружена, когда она выполняет этот код)
-
-            // 4. Делаем запрос на сервер для получения данных о пользователе
-            const response = await fetch(`/home/${userData.id}`, {
+            // Делаем запрос на сервер для получения данных о пользователе
+            const response = await fetch(`http://localhost:8080/home/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}` // Передаем токен в заголовке
                 }
             });
 
-            // Если запрос успешен, вставляем данные в форму
             if (response.ok) {
                 const userResponse = await response.json();
 
@@ -128,7 +116,7 @@
                 document.getElementById('firstName').value = userResponse.firstName;
                 document.getElementById('lastName').value = userResponse.lastName;
                 document.getElementById('email').value = userResponse.email;
-                document.getElementById('dateOfBirth').value = userResponse.dateOfBirth;
+                document.getElementById('dateOfBirth').value = new Date(userResponse.dateOfBirth).toISOString().split('T')[0]; // Преобразуем дату в строку
             } else {
                 alert('Ошибка при загрузке данных пользователя');
             }
@@ -138,7 +126,14 @@
         }
     }
 
-    // Загружаем данные пользователя при загрузке страницы
+    function getJwtTokenFromCookie() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('jwtToken='));
+        if (!cookie) {
+            return null; // Если токен не найден, возвращаем null
+        }
+        return cookie.split('=')[1]; // Извлекаем токен из строки cookie
+    }
+
     window.onload = loadUserData;
 </script>
 

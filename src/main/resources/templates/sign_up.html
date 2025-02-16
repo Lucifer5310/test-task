@@ -95,7 +95,7 @@
     };
 
     try {
-      const response = await fetch("/auth/sign-up", {
+      const response = await fetch("http://localhost:8080/auth/sign-up", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -106,7 +106,7 @@
       if (response.ok) {
         const data = await response.json(); // Получаем JSON с токеном
         localStorage.setItem("jwt", data.token); // Сохраняем токен
-        window.location.href = "/auth/sign-in"; // Перенаправление после успешной регистрации
+        window.location.href = "sign_in.html"; // Перенаправление после успешной регистрации
       } else {
         alert("Sign-up failed! Try again.");
       }
