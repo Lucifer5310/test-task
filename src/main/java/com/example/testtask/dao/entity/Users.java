@@ -1,4 +1,4 @@
-package com.example.testtask.dao;
+package com.example.testtask.dao.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,6 +25,7 @@ public class Users implements UserDetails {
     private long id;
     private String firstName;
     private String lastName;
+    private String username;
     private String email;
     private long dateOfBirth;
     private String password;
@@ -35,12 +36,12 @@ public class Users implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(roles.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + roles.getName()));
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return username;
     }
 
     @Override

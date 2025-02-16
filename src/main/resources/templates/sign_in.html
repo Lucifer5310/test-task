@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign-in Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px;
+    }
+    form {
+      display: inline-block;
+      text-align: left;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .buttons {
+      margin-top: 15px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+    }
+    .back {
+      background-color: #ccc;
+    }
+    .signin {
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Sign-in Form</h1>
+
+<form id="signin-form">
+  <label for="username">Username:</label>
+  <input type="text" id="username" name="username" required>
+
+  <label for="password">Password:</label>
+  <input type="password" id="password" name="password" required>
+
+  <div class="buttons">
+    <button type="button" class="back" onclick="window.history.back()">Back</button>
+    <button type="submit" class="signin">Sign-in</button>
+  </div>
+</form>
+
+<script>
+  document.getElementById("signin-form").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Предотвращаем стандартную отправку формы
+
+    const formData = {
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    };
+
+    try {
+      const response = await fetch("/auth/sign-in", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        const jwtToken = await response.json(); // Ожидаем ответ с id пользователя
+        const userId = getIdFromJWT(JSON.stringify(jwtToken)).toString(); // Предполагаем, что сервер возвращает id
+
+        const url = "/home";
+        window.location.href = url; // Перенаправление после успешного входа
+      } else {
+        alert("Invalid credentials!");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+
+    function getIdFromJWT(token) {
+      if (typeof token !== 'string') {
+        throw new Error('Token должен быть строкой!');
+      }
+      // Разделить токен на три части
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        throw new Error('Invalid token format');
+      }
+
+      // Декодировать второй компонент (payload)
+      const payload = parts[1];
+
+      // Добавить паддинг, если необходимо
+      const padding = '='.repeat((4 - payload.length % 4) % 4);
+      const base64 = payload + padding;
+
+      // Декодировать из base64
+      const decodedPayload = atob(base64);
+
+      // Парсить JSON
+      const jsonPayload = JSON.parse(decodedPayload);
+
+      // Возвращаем ID
+      return jsonPayload.id;
+    }
+  });
+</script>
+
+</body>
+</html>

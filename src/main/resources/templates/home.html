@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        form {
+            display: inline-block;
+            text-align: left;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .buttons {
+            margin-top: 15px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+        .logout {
+            background-color: #ccc;
+        }
+        .change {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+</head>
+<body>
+
+<h1>Change Form</h1>
+
+<form id="change-form">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
+
+    <label for="firstName">First Name:</label>
+    <input type="text" id="firstName" name="firstName" required>
+
+    <label for="lastName">Last Name:</label>
+    <input type="text" id="lastName" name="lastName" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="dateOfBirth">Date of Birth:</label>
+    <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+
+    <label for="password">Current Password:</label>
+    <input type="password" id="password" name="password" required>
+
+    <label for="passwordNew">New Password:</label>
+    <input type="password" id="passwordNew" name="passwordNew" required>
+
+    <div class="buttons">
+        <button type="submit" class="change">Change</button>
+        <button type="button" class="logout" onclick="window.location.href='/main'">Log out</button>
+    </div>
+</form>
+
+<script>
+    // Функция для извлечения токена из куки
+    function getJwtTokenFromCookie() {
+        const token = document.cookie.split('; ').find(row => row.startsWith('jwtToken')).split('=')[1];
+        return token;
+    }
+
+    // Функция для извлечения данных пользователя из JWT токена
+    function extractUserDataFromToken(token) {
+        const decoded = jwt_decode(token); // Декодируем JWT
+        return decoded; // Возвращаем все данные пользователя из токена
+    }
+
+    // Асинхронная функция для загрузки данных о пользователе
+    async function loadUserData() {
+        try {
+            // 1. Извлекаем токен из куки
+            const token = getJwtTokenFromCookie();
+
+            // 2. Извлекаем данные пользователя из токена
+            const userData = extractUserDataFromToken(token);
+
+            if (!userData.id) {
+                throw new Error("User ID не найден в токене");
+            }
+
+            // 3. Загружаем страницу (страница уже загружена, когда она выполняет этот код)
+
+            // 4. Делаем запрос на сервер для получения данных о пользователе
+            const response = await fetch(`/home/${userData.id}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}` // Передаем токен в заголовке
+                }
+            });
+
+            // Если запрос успешен, вставляем данные в форму
+            if (response.ok) {
+                const userResponse = await response.json();
+
+                // Заполняем форму данными пользователя
+                document.getElementById('username').value = userResponse.username;
+                document.getElementById('firstName').value = userResponse.firstName;
+                document.getElementById('lastName').value = userResponse.lastName;
+                document.getElementById('email').value = userResponse.email;
+                document.getElementById('dateOfBirth').value = userResponse.dateOfBirth;
+            } else {
+                alert('Ошибка при загрузке данных пользователя');
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке данных:', error);
+            alert('Ошибка при загрузке данных');
+        }
+    }
+
+    // Загружаем данные пользователя при загрузке страницы
+    window.onload = loadUserData;
+</script>
+
+</body>
+</html>

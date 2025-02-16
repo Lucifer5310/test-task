@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign-up Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px;
+    }
+    form {
+      display: inline-block;
+      text-align: left;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .buttons {
+      margin-top: 15px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+    }
+    .back {
+      background-color: #ccc;
+    }
+    .signup {
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Sign-up Form</h1>
+
+<form id="signup-form">
+  <label for="firstName">First Name:</label>
+  <input type="text" id="firstName" name="firstName" required>
+
+  <label for="lastName">Last Name:</label>
+  <input type="text" id="lastName" name="lastName" required>
+
+  <label for="email">Email:</label>
+  <input type="email" id="email" name="email" required>
+
+  <label for="dateOfBirth">Date of Birth:</label>
+  <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+
+  <label for="username">Username:</label>
+  <input type="text" id="username" name="username" required>
+
+  <label for="password">Password:</label>
+  <input type="password" id="password" name="password" required>
+
+  <div class="buttons">
+    <button type="button" class="back" onclick="window.location.href='/main'">Back</button>
+    <button type="submit" class="signup">Sign-up</button>
+  </div>
+</form>
+
+<script>
+  document.getElementById("signup-form").addEventListener("submit", async function(event) {
+    event.preventDefault(); // Предотвращаем стандартную отправку формы
+
+    const dateOfBirth = new Date(document.getElementById("dateOfBirth").value).getTime();
+
+    const formData = {
+      firstName: document.getElementById("firstName").value,
+      lastName: document.getElementById("lastName").value,
+      email: document.getElementById("email").value,
+      dateOfBirth: dateOfBirth,
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    };
+
+    try {
+      const response = await fetch("/auth/sign-up", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        const data = await response.json(); // Получаем JSON с токеном
+        localStorage.setItem("jwt", data.token); // Сохраняем токен
+        window.location.href = "/auth/sign-in"; // Перенаправление после успешной регистрации
+      } else {
+        alert("Sign-up failed! Try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  });
+</script>
+
+</body>
+</html>

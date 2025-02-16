@@ -1,4 +1,4 @@
-package com.example.testtask.dao;
+package com.example.testtask.dao.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,8 +23,4 @@ public class Role {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "roles", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<Users> users;
-
-    public String name() {
-        return null;
-    }
 }

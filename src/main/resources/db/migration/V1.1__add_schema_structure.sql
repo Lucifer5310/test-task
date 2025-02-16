@@ -10,6 +10,7 @@ CREATE TABLE users
     email         varchar(63) unique not null,
     first_name    varchar(31) not null,
     last_name     varchar(31) not null,
+    username     varchar(63) not null,
     date_of_birth bigint not null,
     password      varchar(255) unique not null,
     role_id       bigint
@@ -26,7 +27,7 @@ CREATE SEQUENCE users_seq
     MINVALUE 1
     CACHE 10;
 CREATE SEQUENCE roles_seq
-    START WITH 1
+    START WITH 6
     INCREMENT BY 1
     MINVALUE 1
     CACHE 10;
