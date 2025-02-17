@@ -5,55 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Change Form</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        form {
-            display: inline-block;
-            text-align: left;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-        input {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .buttons {
-            margin-top: 15px;
-            text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            margin: 5px;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-        }
-        .logout {
-            background-color: #ccc;
-        }
-        .change {
-            background-color: #4CAF50;
-            color: white;
-        }
+        /* Стили остаются такими же */
     </style>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
 </head>
 <body>
 
 <h1>Change Form</h1>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 50px;
+    }
+    form {
+        display: inline-block;
+        text-align: left;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+    label {
+        display: block;
+        margin-top: 10px;
+    }
+    input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .buttons {
+        margin-top: 15px;
+        text-align: center;
+    }
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        margin: 5px;
+        cursor: pointer;
+        border: none;
+        border-radius: 4px;
+    }
+    .logout {
+        background-color: #ccc;
+    }
+    .change {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
 
 <form id="change-form">
     <label for="username">Username:</label>
@@ -79,7 +82,7 @@
 
     <div class="buttons">
         <button type="submit" class="change">Change</button>
-        <button type="button" class="logout" onclick="window.location.href='/main'">Log out</button>
+        <button type="button" class="logout" onclick="logout()">Log out</button>
     </div>
 </form>
 
@@ -126,15 +129,66 @@
         }
     }
 
-    function getJwtTokenFromCookie() {
-        const cookie = document.cookie.split('; ').find(row => row.startsWith('jwtToken='));
-        if (!cookie) {
-            return null; // Если токен не найден, возвращаем null
+    async function handleChangeFormSubmit(event) {
+        event.preventDefault(); // Останавливаем стандартную отправку формы
+
+        const formData = {
+            username: document.getElementById('username').value,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            email: document.getElementById('email').value,
+            dateOfBirth: new Date(document.getElementById('dateOfBirth').value).getTime(),
+            password: document.getElementById('password').value,
+            passwordNew: document.getElementById('passwordNew').value,
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("user_id");
+        const token = urlParams.get("token");
+
+        if (!userId || !token) {
+            alert('Ошибка: user_id или токен не найден');
+            return;
         }
-        return cookie.split('=')[1]; // Извлекаем токен из строки cookie
+
+        try {
+            const response = await fetch(`http://localhost:8080/home/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const updatedUser = await response.json();
+                alert('Данные успешно обновлены');
+
+                // Обновляем данные в форме
+                document.getElementById('username').value = updatedUser.username;
+                document.getElementById('firstName').value = updatedUser.firstName;
+                document.getElementById('lastName').value = updatedUser.lastName;
+                document.getElementById('email').value = updatedUser.email;
+                document.getElementById('dateOfBirth').value = new Date(updatedUser.dateOfBirth).toISOString().split('T')[0];
+                document.getElementById('password').value = null;
+                document.getElementById('passwordNew').value = null;
+            } else {
+                alert('Ошибка при обновлении данных');
+            }
+        } catch (error) {
+            console.error('Ошибка при обновлении данных:', error);
+            alert('Ошибка при обновлении данных');
+        }
+    }
+
+    function logout() {
+        document.cookie = "jwtToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC"; // Удаляем JWT из cookie
+        window.location.href = 'main.html'; // Перенаправляем на главную страницу
     }
 
     window.onload = loadUserData;
+    document.getElementById('change-form').addEventListener('submit', handleChangeFormSubmit);
 </script>
 
 </body>

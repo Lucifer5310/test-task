@@ -17,7 +17,7 @@ public class UserFacade {
     private final PasswordEncoder passwordEncoder;
 
     public UserEditResponse saveEditRequest(UserEditRequest userEditRequest, long id) throws Exception {
-        Users users = userService.findById(id);
+        var users = userService.findById(id);
 
         users.setUsername(userEditRequest.getUsername());
         users.setEmail(userEditRequest.getEmail());
@@ -27,7 +27,7 @@ public class UserFacade {
 
         if (passwordEncoder.matches(userEditRequest.getPassword(), users.getPassword())){
             if (!passwordEncoder.matches(userEditRequest.getPasswordNew(), users.getPassword())){
-                users.setPassword(passwordEncoder.encode(userEditRequest.getPassword()));
+                users.setPassword(passwordEncoder.encode(userEditRequest.getPasswordNew()));
             } else {
                 throw new Exception("This password is already has been used");
             }
